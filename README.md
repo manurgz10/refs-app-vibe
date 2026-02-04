@@ -1,6 +1,6 @@
 # Refs App Vibe – Árbitros de baloncesto
 
-Aplicación web para árbitros de baloncesto: partidos, designaciones, liquidaciones y perfil. Integrada con API de federación (FBIB) y ficha de partido (fitxaPartit).
+Aplicación web para árbitros de baloncesto: partidos, designaciones, liquidaciones y perfil.
 
 ## Características
 
@@ -54,8 +54,8 @@ Edita `.env.local` y rellena al menos:
 | `CREDENTIALS_EMAIL` / `CREDENTIALS_PASSWORD` | Login de desarrollo si no usas API externa |
 | `EXTERNAL_API_URL` | Base URL de la API de federación (si usas API real) |
 | `EXTERNAL_API_LOGIN_URL` | URL de login de la API externa |
-| `FEDERATION_HEADER` | Header Federation (ej: `FBIB`) |
-| `PUBLIC_TOKEN_FBIB` | Token para ficha de partido (fitxaPartit); ver detalle de partido |
+| `FEDERATION_HEADER` | Header Federation |
+| `PUBLIC_TOKEN_FBIB` | Token para ficha de partido; ver detalle de partido |
 
 Con `USE_MOCK_API=true` la app funciona con datos de prueba sin API externa.
 
