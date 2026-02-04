@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { MobileBottomNav } from "@/components/mobile-bottom-nav";
+import { PullToRefresh } from "@/components/pull-to-refresh";
 
 export default function DashboardLayout({
   children,
@@ -18,9 +19,9 @@ export default function DashboardLayout({
           priority
         />
       </header>
-      <div className="flex-1 overflow-auto p-4 pb-24 md:pb-6 md:pt-6">
+      <PullToRefresh className="flex-1 overflow-auto p-4 pb-24 md:pb-6 md:pt-6">
         <div className="mx-auto max-w-3xl">{children}</div>
-      </div>
+      </PullToRefresh>
       <MobileBottomNav />
     </div>
   );
