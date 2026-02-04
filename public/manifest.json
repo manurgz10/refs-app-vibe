@@ -1,7 +1,7 @@
 {
-  "name": "Árbitros - Baloncesto",
-  "short_name": "Árbitros",
-  "description": "App para árbitros: partidos, liquidaciones e ingresos",
+  "name": "Bah, yo paso",
+  "short_name": "Bah, yo paso",
+  "description": "Manute & Jaycee Devs - Bah, yo paso",
   "start_url": "/",
   "display": "standalone",
   "orientation": "portrait-primary",
