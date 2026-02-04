@@ -19,6 +19,8 @@ import { Countdown } from "@/components/countdown";
 import { getGoogleMapsDirectionsUrl } from "@/lib/utils";
 import { CalendarDays, MapPin, Trophy } from "lucide-react";
 
+const MAX_LOCATION_CHARS = 32;
+
 /** Ilustración SVG para estados vacíos (balón/árbitro) */
 function EmptyMatchesIllustration() {
   return (
@@ -52,8 +54,9 @@ function NextMatchCard({
   localLogo?: string | null;
   visitorLogo?: string | null;
 }) {
-  const placeDisplay = [m.installationName, m.town].filter(Boolean).join(", ") || m.installationAddress;
-  const placeForMaps = m.installationAddress?.trim() || placeDisplay;
+  const placeFull = [m.installationName, m.town].filter(Boolean).join(", ") || (m.installationAddress ?? "");
+  const placeForMaps = m.installationAddress?.trim() || placeFull;
+  const placeDisplay = placeFull.length > MAX_LOCATION_CHARS ? placeFull.slice(0, MAX_LOCATION_CHARS) + "..." : placeFull;
   const horario = m.formattedMatchDay ?? (m.matchDay ? new Date(m.matchDay).toLocaleString("es-ES", { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : "");
 
   return (
@@ -98,15 +101,16 @@ function NextMatchCard({
               <CalendarDays className="size-4" aria-hidden />
               {horario}
             </span>
-            {placeDisplay && placeForMaps && (
+            {placeFull && placeForMaps && (
               <a
                 href={getGoogleMapsDirectionsUrl(placeForMaps)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-1 text-primary hover:underline"
+                title={placeFull}
               >
-                <MapPin className="size-4" aria-hidden />
-                {placeDisplay}
+                <MapPin className="size-4 shrink-0" aria-hidden />
+                <span className="truncate">{placeDisplay}</span>
               </a>
             )}
           </div>

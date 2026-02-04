@@ -1,3 +1,4 @@
+import { HistoricoLiquidacionesClient } from "@/app/(dashboard)/liquidaciones/historico-liquidaciones-client";
 import { auth } from "@/lib/auth";
 import { getLiquidaciones } from "@/lib/services/liquidaciones";
 import { getPaymentsNotPending } from "@/lib/services/payments-not-pending";
@@ -98,95 +99,6 @@ function WeeklySection({ items }: { items: PreliquidationWeeklyItem[] }) {
   );
 }
 
-/** Card de un pago del histórico (solo móvil) */
-function HistoricoPaymentCard({ p }: { p: PaymentNotPending }) {
-  const period = formatPeriod(p.initialControlDate, p.finalControlDate);
-  return (
-    <div className="flex flex-col gap-3 rounded-lg border border-border bg-muted/30 p-4">
-      <p className="font-medium text-foreground">{period}</p>
-      <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
-        <span className="text-muted-foreground">Bruto</span>
-        <span className="tabular-nums text-right">
-          {formatEuro(p.grosAmount)}
-          {p.amountHoldingIRPF > 0 && (
-            <span className="block text-xs text-muted-foreground">IRPF −{formatEuro(p.amountHoldingIRPF)}</span>
-          )}
-        </span>
-        <span className="text-muted-foreground">Neto</span>
-        <span className="tabular-nums text-right font-medium">{formatEuro(p.netAmount)}</span>
-        <span className="text-muted-foreground">A cobrar</span>
-        <span className="tabular-nums text-right font-semibold text-primary">{formatEuro(p.toPayAmount)}</span>
-      </div>
-    </div>
-  );
-}
-
-/** Histórico de pagos */
-function HistoricoSection({ payments }: { payments: PaymentNotPending[] }) {
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-base">Histórico de liquidaciones</CardTitle>
-        <CardDescription>Pagos ya procesados por período</CardDescription>
-      </CardHeader>
-      <CardContent>
-        {payments.length === 0 ? (
-          <div className="py-8">
-            <div className="mx-auto flex max-w-[80px] justify-center text-muted-foreground/40">
-              <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="1.5" className="size-full" aria-hidden>
-                <rect x="4" y="8" width="40" height="32" rx="2" />
-                <path d="M4 20h40M16 8v8M32 8v8" />
-              </svg>
-            </div>
-            <p className="mt-4 text-center text-sm text-muted-foreground">
-              No hay historial de pagos.
-            </p>
-          </div>
-        ) : (
-          <>
-            {/* Mobile: lista de cards */}
-            <div className="flex flex-col gap-3 md:hidden">
-              {payments.map((p) => (
-                <HistoricoPaymentCard key={p.idPayment} p={p} />
-              ))}
-            </div>
-            {/* Desktop: tabla */}
-            <div className="hidden overflow-x-auto md:block">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Período</TableHead>
-                    <TableHead className="text-right">Bruto</TableHead>
-                    <TableHead className="text-right">Neto</TableHead>
-                    <TableHead className="text-right">A cobrar</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {payments.map((p) => (
-                    <TableRow key={p.idPayment}>
-                      <TableCell className="font-medium">
-                        {formatPeriod(p.initialControlDate, p.finalControlDate)}
-                      </TableCell>
-                      <TableCell className="text-right text-muted-foreground">
-                        {formatEuro(p.grosAmount)}
-                        {p.amountHoldingIRPF > 0 && (
-                          <span className="block text-xs">IRPF −{formatEuro(p.amountHoldingIRPF)}</span>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-right tabular-nums">{formatEuro(p.netAmount)}</TableCell>
-                      <TableCell className="text-right tabular-nums">{formatEuro(p.toPayAmount)}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          </>
-        )}
-      </CardContent>
-    </Card>
-  );
-}
-
 /** Vista con API real */
 function ApiView({
   weekly,
@@ -204,7 +116,7 @@ function ApiView({
         </section>
       )}
       <section>
-        <HistoricoSection payments={historico} />
+        <HistoricoLiquidacionesClient payments={historico} />
       </section>
     </div>
   );

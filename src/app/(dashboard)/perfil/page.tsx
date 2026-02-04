@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth";
 import { getRefereePersonalData } from "@/lib/services/referee";
 import type { RefereePersonalData } from "@/lib/types";
+import { SignOutButton } from "@/components/sign-out-button";
 import { Badge } from "@/components/ui/badge";
 import {
   Card,
@@ -81,6 +82,9 @@ export default async function PerfilPage() {
               )}
             </div>
           )}
+          <div className="mt-6 border-t border-border pt-6">
+            <SignOutButton />
+          </div>
         </CardContent>
       </Card>
     </div>

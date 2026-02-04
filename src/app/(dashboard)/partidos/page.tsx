@@ -9,8 +9,8 @@ import type { MyMatchDesignation } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { PartidosTabsClient } from "./partidos-tabs-client";
-import { CalendarDays, MapPin, UserRound, Trophy } from "lucide-react";
-import { getGoogleMapsDirectionsUrl } from "@/lib/utils";
+import { CalendarDays, MapPin, Medal, Trophy, UserRound } from "lucide-react";
+import { designationRoleOrder, getGoogleMapsDirectionsUrl } from "@/lib/utils";
 
 export type MatchLogos = { localClubLogo: string | null; visitorClubLogo: string | null };
 
@@ -20,13 +20,15 @@ function isRefereeRole(role: string | null | undefined): boolean {
   return r.includes("arbitro") || r.includes("árbitro") || r.includes("principal") || r.includes("auxiliar");
 }
 
-/** Dado designaciones del partido y nombre del usuario actual, devuelve solo el otro árbitro: "Nombre" o "Solo". */
+/** Dado designaciones del partido y nombre del usuario actual, devuelve solo el otro árbitro: "Nombre" o "Solo". Principal primero, luego auxiliar. */
 function getCompanionsLabel(
   designations: { refereeName: string; refereeSurname: string; refereeRole?: string }[],
   currentUserName: string | null | undefined
 ): string {
   const current = (currentUserName ?? "").trim().toLowerCase();
-  const onlyReferees = designations.filter((d) => isRefereeRole(d.refereeRole));
+  const onlyReferees = designations
+    .filter((d) => isRefereeRole(d.refereeRole))
+    .sort((a, b) => designationRoleOrder(a.refereeRole) - designationRoleOrder(b.refereeRole));
   const others = onlyReferees
     .map((d) => ((d.refereeName ?? "").trim() + " " + (d.refereeSurname ?? "").trim()).trim())
     .filter((full) => full && full.toLowerCase() !== current);
@@ -34,12 +36,15 @@ function getCompanionsLabel(
   return others.join(", ");
 }
 
-/** Dirección para mostrar y para enlace a Maps: preferir dirección completa */
-function getMatchAddress(m: MyMatchDesignation): { display: string; forMaps: string } | null {
-  const display = [m.installationName, m.town].filter(Boolean).join(", ") || m.installationAddress || null;
-  if (!display) return null;
-  const forMaps = m.installationAddress?.trim() || display;
-  return { display, forMaps };
+const MAX_LOCATION_CHARS = 32;
+
+/** Dirección para mostrar (truncada) y para enlace a Maps (completa). */
+function getMatchAddress(m: MyMatchDesignation): { display: string; full: string; forMaps: string } | null {
+  const full = [m.installationName, m.town].filter(Boolean).join(", ") || m.installationAddress || null;
+  if (!full) return null;
+  const forMaps = m.installationAddress?.trim() || full;
+  const display = full.length > MAX_LOCATION_CHARS ? full.slice(0, MAX_LOCATION_CHARS) + "..." : full;
+  return { display, full, forMaps };
 }
 
 /** Contenedor fijo para igualar tamaño de escudos. */
@@ -63,7 +68,6 @@ function MyMatchRow({
   logos?: MatchLogos | null;
   companions?: string;
 }) {
-  const fechaStr = m.formattedMatchDay ?? (m.matchDay ? new Date(m.matchDay).toLocaleString("es-ES", { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : "");
   const address = getMatchAddress(m);
 
   return (
@@ -92,33 +96,34 @@ function MyMatchRow({
           <span className="text-muted-foreground">–</span>
           <LogoCell src={logos?.visitorClubLogo} />
         </Link>
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
-          <span className="flex items-center gap-1">
-            <CalendarDays className="size-3.5 shrink-0" aria-hidden />
-            {fechaStr}
-          </span>
-          {address && (
-            <a
-              href={getGoogleMapsDirectionsUrl(address.forMaps)}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 text-primary hover:underline"
-            >
-              <MapPin className="size-3.5 shrink-0" aria-hidden />
-              {address.display}
-              <span className="sr-only"> (abre Google Maps para indicaciones)</span>
-            </a>
-          )}
-        </div>
+        {address && (
+          <a
+            href={getGoogleMapsDirectionsUrl(address.forMaps)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
+            title={address.full}
+          >
+            <MapPin className="size-3.5 shrink-0" aria-hidden />
+            <span className="truncate">{address.display}</span>
+            <span className="sr-only"> (abre Google Maps para indicaciones)</span>
+          </a>
+        )}
         <div className="flex flex-wrap gap-1.5 pt-0.5">
           <Badge variant="secondary" className="text-[10px] font-normal">
             <UserRound className="mr-0.5 size-2.5" aria-hidden />
             {companions ?? "—"}
           </Badge>
-          {m.categoryName && (
-            <Badge variant="outline" className="text-[10px] font-normal">
+          {m.categoryName?.trim() && (
+            <Badge variant="outline" className="text-[10px] font-normal" title="Categoría">
               <Trophy className="mr-0.5 size-2.5" aria-hidden />
-              {m.categoryName}
+              {m.categoryName.trim()}
+            </Badge>
+          )}
+          {m.competitionName?.trim() && (
+            <Badge variant="outline" className="text-[10px] font-normal" title="Competición">
+              <Medal className="mr-0.5 size-2.5" aria-hidden />
+              {m.competitionName.trim()}
             </Badge>
           )}
         </div>

@@ -5,7 +5,7 @@ import type { FitxaPartitMatch, FitxaPartitDesignation, FitxaPartitStandingEntry
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { getGoogleMapsDirectionsUrl } from "@/lib/utils";
+import { designationRoleOrder, getGoogleMapsDirectionsUrl } from "@/lib/utils";
 import { ArrowLeft, CalendarDays, MapPin, Users, Trophy, Award, Navigation } from "lucide-react";
 
 function formatMatchDay(matchDay: string | null | undefined) {
@@ -68,7 +68,10 @@ export default async function PartidoDetailPage({
     notFound();
   }
   const match = data.messageData?.match;
-  const designations = (data.messageData?.designations ?? []) as FitxaPartitDesignation[];
+  const rawDesignations = (data.messageData?.designations ?? []) as FitxaPartitDesignation[];
+  const designations = [...rawDesignations].sort(
+    (a, b) => designationRoleOrder(a.refereeRole) - designationRoleOrder(b.refereeRole)
+  );
   const standing = (data.messageData?.standing ?? []) as FitxaPartitStandingEntry[];
   const group = data.messageData?.group as { nameGroup?: string } | undefined;
 
