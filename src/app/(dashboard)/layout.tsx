@@ -1,6 +1,5 @@
 import Image from "next/image";
 import { MobileBottomNav } from "@/components/mobile-bottom-nav";
-import { PullToRefresh } from "@/components/pull-to-refresh";
 
 export default function DashboardLayout({
   children,
@@ -9,7 +8,7 @@ export default function DashboardLayout({
 }) {
   return (
     <div className="flex min-h-svh flex-col">
-      <header className="flex h-14 shrink-0 items-center justify-center border-b border-border bg-card/95 px-4 backdrop-blur supports-[backdrop-filter]:bg-card/80 md:px-6">
+      <header className="flex min-h-14 shrink-0 items-center justify-center border-b border-border bg-card px-4 pt-[env(safe-area-inset-top)] backdrop-blur supports-[backdrop-filter]:bg-card/95 md:px-6 md:pt-0">
         <Image
           src="/logo1.png"
           alt="Árbitros"
@@ -19,9 +18,11 @@ export default function DashboardLayout({
           priority
         />
       </header>
-      <PullToRefresh className="flex-1 overflow-auto p-4 pb-24 md:pb-6 md:pt-6">
-        <div className="mx-auto max-w-3xl">{children}</div>
-      </PullToRefresh>
+      <div className="flex-1 overflow-auto p-4 pb-24 md:pb-6 md:pt-6 [-webkit-overflow-scrolling:touch]">
+        <div className="mx-auto max-w-3xl">
+          {children}
+        </div>
+      </div>
       <MobileBottomNav />
     </div>
   );

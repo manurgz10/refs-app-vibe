@@ -121,11 +121,17 @@
     @apply border-border outline-ring/50;
   }
   html {
-    /* Mobile-first: safe area para notch/home indicator */
-    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    padding: 0 env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
   }
   body {
     @apply bg-background text-foreground min-h-[100dvh];
+    -webkit-tap-highlight-color: transparent;
+  }
+  input,
+  textarea,
+  [contenteditable="true"] {
+    -webkit-user-select: text;
+    user-select: text;
   }
 }
 

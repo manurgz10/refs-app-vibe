@@ -34,6 +34,22 @@
       "purpose": "maskable"
     }
   ],
+  "shortcuts": [
+    {
+      "name": "Partidos",
+      "short_name": "Partidos",
+      "description": "Ver mis partidos de la semana",
+      "url": "/partidos",
+      "icons": [{ "src": "/web-app-manifest-192x192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "Liquidaciones",
+      "short_name": "Liquidaciones",
+      "description": "Ver liquidaciones y pagos",
+      "url": "/liquidaciones",
+      "icons": [{ "src": "/web-app-manifest-192x192.png", "sizes": "192x192", "type": "image/png" }]
+    }
+  ],
   "screenshots": [
     {
       "src": "/screenshot-mobile.png",

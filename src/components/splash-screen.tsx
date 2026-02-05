@@ -8,11 +8,9 @@ export function SplashScreen() {
   const [isVisible, setIsVisible] = useState(true);
 
   useEffect(() => {
-    // Ocultar después de 1.5 segundos
     const timer = setTimeout(() => {
       setIsVisible(false);
     }, 1500);
-
     return () => clearTimeout(timer);
   }, []);
 
