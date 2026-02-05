@@ -33,11 +33,9 @@ function VenueBlock({ m }: { m: FitxaPartitMatch }) {
   const displayAddress = [m.nameField, addressOnly].filter(Boolean).join(" · ") || nameField || "";
   return (
     <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
-      <div className="flex flex-wrap items-start gap-2 text-sm">
+      <div className="flex min-w-0 flex-1 items-start gap-2 text-sm">
         <MapPin className="mt-0.5 size-4 shrink-0 text-muted-foreground" aria-hidden />
-        <div>
-          <p className="text-foreground">{displayAddress}</p>
-        </div>
+        <p className="min-w-0 text-foreground">{displayAddress}</p>
       </div>
       {forMaps && (
         <Button variant="outline" size="sm" asChild className="shrink-0">
@@ -185,17 +183,7 @@ export default async function PartidoDetailPage({
         )}
       </div>
 
-      {/* Pabellón / dirección */}
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-base">Pabellón y dirección</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <VenueBlock m={match} />
-        </CardContent>
-      </Card>
-
-      {/* Designaciones (árbitros) */}
+      {/* Designaciones (árbitros) — incluido en la captura para compartir */}
       {designations.length > 0 && (
         <Card>
           <CardHeader className="pb-2">
@@ -223,8 +211,19 @@ export default async function PartidoDetailPage({
           </CardContent>
         </Card>
       )}
+      </div>
 
-      {/* Clasificación del grupo */}
+      {/* Pabellón / dirección — no incluido en la captura */}
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base">Pabellón y dirección</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <VenueBlock m={match} />
+        </CardContent>
+      </Card>
+
+      {/* Clasificación del grupo — no incluida en la captura */}
       {standing.length > 0 && (
         <Card>
           <CardHeader className="pb-2">
@@ -284,7 +283,6 @@ export default async function PartidoDetailPage({
           </CardContent>
         </Card>
       )}
-      </div>
     </div>
   );
 }

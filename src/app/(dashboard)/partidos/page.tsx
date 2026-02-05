@@ -89,7 +89,7 @@ function MyMatchRow({
       <div className="min-w-0 flex-1 space-y-2">
         <Link
           href={"/partidos/" + m.matchId}
-          className="flex items-center justify-center gap-3 transition-opacity hover:opacity-90"
+          className="flex items-center justify-start gap-3 transition-opacity hover:opacity-90"
           title={m.localTeamName + " – " + m.visitorTeamName}
         >
           <LogoCell src={logos?.localClubLogo} />

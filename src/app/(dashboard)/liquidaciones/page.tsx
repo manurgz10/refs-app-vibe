@@ -68,16 +68,27 @@ function MatchTeamsDisplay({
   const title = [local, visitor].filter(Boolean).join(" – ") || undefined;
   return (
     <div
-      className="flex min-w-0 flex-col gap-0.5 overflow-hidden font-medium"
+      className="flex min-w-0 flex-col gap-1.5 overflow-hidden"
       title={title}
     >
       {localStr ? (
-        <span className="min-w-0 truncate text-primary">{localStr}</span>
+        <Badge
+          variant="default"
+          className="max-w-full shrink-0 truncate justify-start font-medium"
+        >
+          {localStr}
+        </Badge>
       ) : null}
       {visitorStr ? (
-        <span className="min-w-0 truncate text-chart-3">{visitorStr}</span>
+        <Badge
+          className="max-w-full shrink-0 truncate justify-start border-transparent bg-chart-3/15 font-medium text-chart-3"
+        >
+          {visitorStr}
+        </Badge>
       ) : null}
-      {!localStr && !visitorStr ? <span className="text-foreground">Partido</span> : null}
+      {!localStr && !visitorStr ? (
+        <span className="text-sm font-medium text-muted-foreground">Partido</span>
+      ) : null}
     </div>
   );
 }
