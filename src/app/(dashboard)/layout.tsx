@@ -25,7 +25,7 @@ export default function DashboardLayout({
             priority
           />
         </header>
-        <div className="flex-1 overflow-auto p-4 pb-24 md:pb-6 md:pt-6 [-webkit-overflow-scrolling:touch]">
+        <div className="flex-1 overflow-auto p-4 pb-32 md:pb-6 md:pt-6 [-webkit-overflow-scrolling:touch]">
           <div className="mx-auto max-w-3xl">
             {children}
           </div>

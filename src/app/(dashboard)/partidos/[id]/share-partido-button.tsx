@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Share2, Loader2 } from "lucide-react";
 
 const SHARE_AREA_ID = "partido-share-area";
+const SHARE_TEXT =
+  "Acabo de compartir un partido gracias a Bah, Yo paso! JC y Manute son la ostia!!!";
 
 const COLOR_VARS = [
   "background",
@@ -133,7 +135,7 @@ export function SharePartidoButton() {
       if (navigator.canShare?.({ files: [file] }) !== false) {
         await navigator.share({
           title: "Partido",
-          text: "Acabo de compartir un partido gracias a Bah, Yo paso! JC y Manute son la ostia!!!",
+          text: SHARE_TEXT,
           files: [file],
         });
         return true;

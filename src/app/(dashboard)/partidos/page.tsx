@@ -7,7 +7,7 @@ import { getPartidos } from "@/lib/services/partidos";
 import type { Partido } from "@/lib/types";
 import type { MyMatchDesignation } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card";
 import { PartidosTabsClient } from "./partidos-tabs-client";
 import { SharePartidosButton, PARTIDOS_LIST_SHARE_ID } from "./share-partidos-button";
 import { CalendarDays, MapPin, Medal, Trophy, UserRound } from "lucide-react";
@@ -146,19 +146,22 @@ function MyMatchesView({
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h1 className="page-title">Partidos de esta semana</h1>
+        <div className="flex items-center gap-2">
+          <CalendarDays className="size-5 shrink-0 text-muted-foreground" aria-hidden />
+          <h2 className="text-lg font-semibold">Esta semana</h2>
+          <Badge variant="outline" className="text-xs">
+            {matches.length} partido{matches.length !== 1 ? "s" : ""}
+          </Badge>
+        </div>
         {matches.length > 0 && <SharePartidosButton />}
       </div>
       <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-base">Designaciones</CardTitle>
-          <CardDescription>
-            {matches.length === 0
-              ? "No tienes partidos asignados esta semana"
-              : matches.length + " partido" + (matches.length !== 1 ? "s" : "") + " esta semana"}
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="pt-2">
+        {matches.length === 0 && (
+          <CardHeader className="pb-2">
+            <CardDescription>No tienes partidos asignados esta semana</CardDescription>
+          </CardHeader>
+        )}
+        <CardContent className={matches.length === 0 ? "pt-2" : "pt-6"}>
           {matches.length === 0 ? (
             <div className="py-10">
               <div className="mx-auto flex max-w-[100px] justify-center text-muted-foreground/40">
