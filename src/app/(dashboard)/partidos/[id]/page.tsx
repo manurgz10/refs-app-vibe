@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { designationRoleOrder, getGoogleMapsDirectionsUrl } from "@/lib/utils";
 import { ArrowLeft, CalendarDays, MapPin, Users, Trophy, Award, Navigation } from "lucide-react";
+import { SharePartidoButton, SHARE_AREA_ID } from "./share-partido-button";
 
 function formatMatchDay(matchDay: string | null | undefined) {
   if (!matchDay) return "—";
@@ -100,8 +101,10 @@ export default async function PartidoDetailPage({
             Volver a Partidos
           </Link>
         </Button>
+        <SharePartidoButton />
       </div>
 
+      <div id={SHARE_AREA_ID} className="space-y-6">
       {/* Encabezado: equipos y fecha */}
       <Card>
         <CardContent className="pt-6">
@@ -281,6 +284,7 @@ export default async function PartidoDetailPage({
           </CardContent>
         </Card>
       )}
+      </div>
     </div>
   );
 }
