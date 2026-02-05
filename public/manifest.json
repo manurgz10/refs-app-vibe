@@ -39,31 +39,13 @@
       "name": "Partidos",
       "short_name": "Partidos",
       "description": "Ver mis partidos de la semana",
-      "url": "/partidos",
-      "icons": [{ "src": "/web-app-manifest-192x192.png", "sizes": "192x192", "type": "image/png" }]
+      "url": "/partidos"
     },
     {
       "name": "Liquidaciones",
       "short_name": "Liquidaciones",
       "description": "Ver liquidaciones y pagos",
-      "url": "/liquidaciones",
-      "icons": [{ "src": "/web-app-manifest-192x192.png", "sizes": "192x192", "type": "image/png" }]
-    }
-  ],
-  "screenshots": [
-    {
-      "src": "/screenshot-mobile.png",
-      "sizes": "1170x2532",
-      "type": "image/png",
-      "form_factor": "narrow",
-      "label": "Vista móvil de la app"
-    },
-    {
-      "src": "/screenshot-desktop.png",
-      "sizes": "1920x1080",
-      "type": "image/png",
-      "form_factor": "wide",
-      "label": "Vista de escritorio"
+      "url": "/liquidaciones"
     }
   ]
 }
