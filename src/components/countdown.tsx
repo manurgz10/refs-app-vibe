@@ -12,7 +12,7 @@ function formatCountdown(ms: number): string {
   if (days > 0) parts.push(`${days} día${days !== 1 ? "s" : ""}`);
   if (hours > 0 || parts.length) parts.push(`${hours} h`);
   if (min > 0 || parts.length) parts.push(`${min} min`);
-  if (parts.length === 0 || days === 0) parts.push(`${sec} s`);
+  parts.push(`${sec} s`);
   return parts.join(" ");
 }
 

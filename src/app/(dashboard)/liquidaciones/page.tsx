@@ -22,6 +22,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { Wallet, CalendarDays, Receipt } from "lucide-react";
 
 function formatEuro(n: number) {
   return new Intl.NumberFormat("es-ES", {
@@ -46,56 +48,118 @@ function formatPeriod(initial: string, final: string) {
   return `${a.toLocaleDateString("es-ES", { month: "short", year: "numeric" })} – ${b.toLocaleDateString("es-ES", { month: "short", year: "numeric" })}`;
 }
 
-/** Liquidación semanal */
+const MAX_TEAM_NAME_CHARS = 32;
+
+function truncateTeamName(name: string | null | undefined): string {
+  if (!name || !name.trim()) return "";
+  const t = name.trim();
+  return t.length > MAX_TEAM_NAME_CHARS ? t.slice(0, MAX_TEAM_NAME_CHARS) + "…" : t;
+}
+
+function MatchTeamsDisplay({
+  local,
+  visitor,
+}: {
+  local: string | null | undefined;
+  visitor: string | null | undefined;
+}) {
+  const localStr = truncateTeamName(local);
+  const visitorStr = truncateTeamName(visitor);
+  const title = [local, visitor].filter(Boolean).join(" – ") || undefined;
+  return (
+    <div
+      className="flex min-w-0 flex-col gap-0.5 overflow-hidden font-medium"
+      title={title}
+    >
+      {localStr ? (
+        <span className="min-w-0 truncate text-primary">{localStr}</span>
+      ) : null}
+      {visitorStr ? (
+        <span className="min-w-0 truncate text-chart-3">{visitorStr}</span>
+      ) : null}
+      {!localStr && !visitorStr ? <span className="text-foreground">Partido</span> : null}
+    </div>
+  );
+}
+
+/** Resumen destacado de la semana */
+function WeeklySummaryCard({ totalNet, totalGross }: { totalNet: number; totalGross: number }) {
+  return (
+    <Card className="border-primary/20 bg-primary/5">
+      <CardContent className="flex flex-row items-center justify-between gap-4 pt-6">
+        <div className="flex items-center gap-3">
+          <div className="flex size-12 items-center justify-center rounded-full bg-primary/15">
+            <Wallet className="size-6 text-primary" aria-hidden />
+          </div>
+          <div>
+            <p className="text-sm font-medium text-muted-foreground">Total pendiente esta semana</p>
+            <p className="text-2xl font-bold tabular-nums text-primary">{formatEuro(totalNet)}</p>
+          </div>
+        </div>
+        <Badge variant="secondary" className="shrink-0 text-xs">
+          Bruto {formatEuro(totalGross)}
+        </Badge>
+      </CardContent>
+    </Card>
+  );
+}
+
+/** Liquidación semanal: lista de partidos con desglose claro */
 function WeeklySection({ items }: { items: PreliquidationWeeklyItem[] }) {
   const totalNet = items.reduce((sum, i) => sum + i.netAmount, 0);
   const totalGross = items.reduce((sum, i) => sum + i.grossAmount, 0);
 
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-base">Liquidación semanal</CardTitle>
-        <div className="text-right">
-          <p className="text-lg font-semibold tabular-nums">{formatEuro(totalNet)}</p>
-          <CardDescription>Neto · Bruto {formatEuro(totalGross)}</CardDescription>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div className="divide-y">
-          {items.map((item) => (
-            <div key={item.liquidationId} className="flex flex-col gap-1.5 py-4 first:pt-0">
-              <div className="flex flex-wrap items-center gap-2">
-                <p className="font-medium text-foreground">
-                  {[item.localTeamName, item.visitorTeamName].filter(Boolean).join(" – ") || "Partido"}
-                </p>
-                {item.categoryName && (
-                  <Badge variant="secondary" className="text-[10px] font-normal">
-                    {item.categoryName}
-                  </Badge>
-                )}
+    <section className="space-y-4">
+      <div className="flex items-center gap-2">
+        <CalendarDays className="size-5 text-muted-foreground" aria-hidden />
+        <h2 className="text-lg font-semibold">Esta semana</h2>
+        <Badge variant="outline" className="text-xs">
+          {items.length} partido{items.length !== 1 ? "s" : ""}
+        </Badge>
+      </div>
+      <WeeklySummaryCard totalNet={totalNet} totalGross={totalGross} />
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Receipt className="size-4" aria-hidden />
+            Desglose por partido
+          </CardTitle>
+          <CardDescription>Bruto y neto de cada designación</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-0">
+            {items.map((item, index) => (
+              <div key={item.liquidationId}>
+                {index > 0 && <Separator className="my-4" />}
+                <div className="flex flex-col gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <MatchTeamsDisplay local={item.localTeamName} visitor={item.visitorTeamName} />
+                    {item.categoryName && (
+                      <Badge variant="secondary" className="text-xs font-normal">
+                        {item.categoryName}
+                      </Badge>
+                    )}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {item.formattedMatchDate ?? formatFecha(item.matchDate)}
+                    {item.conceptLiteral ? ` · ${item.conceptLiteral}` : ""}
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    <Badge variant="secondary" className="px-3 py-1.5 text-sm font-medium tabular-nums">
+                      Bruto {formatEuro(item.grossAmount)}
+                    </Badge>
+                    <Badge variant="success" className="px-3 py-1.5 text-sm font-semibold tabular-nums">
+                      Neto {formatEuro(item.netAmount)}
+                    </Badge>
+                  </div>
+                </div>
               </div>
-              <p className="text-xs text-muted-foreground">
-                {item.formattedMatchDate ?? formatFecha(item.matchDate)}
-                {item.conceptLiteral ? ` · ${item.conceptLiteral}` : ""}
-              </p>
-              <div className="mt-2 flex flex-wrap items-baseline gap-x-4 gap-y-0.5 text-xs">
-                <span className="tabular-nums font-medium text-foreground">
-                  Neto {formatEuro(item.netAmount)}
-                </span>
-                <span className="text-muted-foreground">
-                  Bruto {formatEuro(item.grossAmount)}
-                </span>
-                {item.irpfRetentionAmount != null && item.irpfRetentionAmount > 0 && (
-                  <span className="text-muted-foreground">
-                    IRPF −{formatEuro(item.irpfRetentionAmount)}
-                  </span>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-      </CardContent>
-    </Card>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    </section>
   );
 }
 
@@ -108,14 +172,9 @@ function ApiView({
   historico: PaymentNotPending[];
 }) {
   return (
-    <div className="space-y-6 md:space-y-8">
-      <h1 className="page-title">Liquidaciones</h1>
-      {weekly.length > 0 && (
-        <section>
-          <WeeklySection items={weekly} />
-        </section>
-      )}
-      <section>
+    <div className="space-y-8">
+      {weekly.length > 0 && <WeeklySection items={weekly} />}
+      <section className="space-y-4">
         <HistoricoLiquidacionesClient payments={historico} />
       </section>
     </div>

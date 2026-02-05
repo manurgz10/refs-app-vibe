@@ -8,6 +8,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { History, Banknote } from "lucide-react";
 
 function formatEuro(n: number) {
   return new Intl.NumberFormat("es-ES", {
@@ -28,22 +30,40 @@ function HistoricoPaymentCard({ p }: { p: PaymentNotPending }) {
   const period = formatPeriod(p.initialControlDate, p.finalControlDate);
   return (
     <div
-      className="flex w-full min-w-full shrink-0 flex-col gap-3 rounded-lg border border-border bg-muted/30 p-4 snap-start"
+      className="flex w-full min-w-full shrink-0 flex-col gap-4 rounded-xl border border-border bg-card p-5 shadow-sm snap-start"
       style={{ scrollSnapStop: "always" }}
     >
-      <p className="font-medium text-foreground">{period}</p>
-      <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
-        <span className="text-muted-foreground">Bruto</span>
-        <span className="tabular-nums text-right">
-          {formatEuro(p.grosAmount)}
-          {p.amountHoldingIRPF > 0 && (
-            <span className="block text-xs text-muted-foreground">IRPF −{formatEuro(p.amountHoldingIRPF)}</span>
-          )}
-        </span>
-        <span className="text-muted-foreground">Neto</span>
-        <span className="tabular-nums text-right font-medium">{formatEuro(p.netAmount)}</span>
-        <span className="text-muted-foreground">A cobrar</span>
-        <span className="tabular-nums text-right font-semibold text-primary">{formatEuro(p.toPayAmount)}</span>
+      <Badge variant="outline" className="w-fit text-xs font-medium">
+        {period}
+      </Badge>
+      <div className="space-y-3">
+        <div className="flex items-center justify-between text-sm">
+          <span className="text-muted-foreground">Bruto</span>
+          <span className="tabular-nums font-medium">{formatEuro(p.grosAmount)}</span>
+        </div>
+        {p.amountHoldingIRPF > 0 && (
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-muted-foreground">IRPF</span>
+            <span className="tabular-nums text-amber-600 dark:text-amber-400">
+              −{formatEuro(p.amountHoldingIRPF)}
+            </span>
+          </div>
+        )}
+        <div className="flex items-center justify-between text-sm">
+          <span className="text-muted-foreground">Neto</span>
+          <span className="tabular-nums font-medium">{formatEuro(p.netAmount)}</span>
+        </div>
+      </div>
+      <div className="mt-auto rounded-lg bg-emerald-500/10 px-3 py-2.5">
+        <div className="flex items-center justify-between gap-2">
+          <span className="flex items-center gap-1.5 text-xs font-medium text-emerald-700 dark:text-emerald-400">
+            <Banknote className="size-3.5" aria-hidden />
+            A cobrar
+          </span>
+          <span className="text-lg font-bold tabular-nums text-emerald-700 dark:text-emerald-400">
+            {formatEuro(p.toPayAmount)}
+          </span>
+        </div>
       </div>
     </div>
   );
@@ -54,16 +74,16 @@ export function HistoricoLiquidacionesClient({ payments }: { payments: PaymentNo
     return (
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Histórico de liquidaciones</CardTitle>
+          <div className="flex items-center gap-2">
+            <History className="size-5 text-muted-foreground" aria-hidden />
+            <CardTitle className="text-base">Histórico de liquidaciones</CardTitle>
+          </div>
           <CardDescription>Pagos ya procesados por período</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="py-8">
-            <div className="mx-auto flex max-w-[80px] justify-center text-muted-foreground/40">
-              <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="1.5" className="size-full" aria-hidden>
-                <rect x="4" y="8" width="40" height="32" rx="2" />
-                <path d="M4 20h40M16 8v8M32 8v8" />
-              </svg>
+          <div className="flex flex-col items-center justify-center py-12">
+            <div className="flex size-16 items-center justify-center rounded-full bg-muted">
+              <History className="size-8 text-muted-foreground/60" aria-hidden />
             </div>
             <p className="mt-4 text-center text-sm text-muted-foreground">
               No hay historial de pagos.
@@ -77,12 +97,15 @@ export function HistoricoLiquidacionesClient({ payments }: { payments: PaymentNo
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base">Histórico de liquidaciones</CardTitle>
-        <CardDescription>Pagos ya procesados por período</CardDescription>
+        <div className="flex items-center gap-2">
+          <History className="size-5 text-muted-foreground" aria-hidden />
+          <CardTitle className="text-base">Histórico de liquidaciones</CardTitle>
+        </div>
+        <CardDescription>Pagos ya procesados por período. Desliza para ver más.</CardDescription>
       </CardHeader>
       <CardContent>
         <div
-          className="-mx-1 flex overflow-x-auto overflow-y-hidden pb-1 scroll-smooth md:-mx-2"
+          className="-mx-1 flex gap-4 overflow-x-auto overflow-y-hidden pb-1 scroll-smooth md:-mx-2"
           style={{ scrollSnapType: "x mandatory" }}
         >
           {payments.map((p) => (

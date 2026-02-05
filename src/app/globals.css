@@ -140,3 +140,8 @@
     @apply text-2xl font-semibold tracking-tight;
   }
 }
+
+html, body {
+  overscroll-behavior-y: none; /* Bloquea el rebote */
+  background-color: #ffffff;   /* Asegura que el fondo base sea blanco */
+}
