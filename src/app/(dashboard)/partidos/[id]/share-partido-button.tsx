@@ -131,7 +131,11 @@ export function SharePartidoButton() {
     if (!navigator.share) return false;
     try {
       if (navigator.canShare?.({ files: [file] }) !== false) {
-        await navigator.share({ title: "Partido", files: [file] });
+        await navigator.share({
+          title: "Partido",
+          text: "Acabo de compartir un partido gracias a Bah, Yo paso! JC y Manute son la ostia!!!",
+          files: [file],
+        });
         return true;
       }
     } catch (err) {
