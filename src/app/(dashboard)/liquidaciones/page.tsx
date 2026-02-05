@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Wallet, CalendarDays, Receipt } from "lucide-react";
+import { Wallet, CalendarDays, Receipt, Trophy } from "lucide-react";
 
 function formatEuro(n: number) {
   return new Intl.NumberFormat("es-ES", {
@@ -68,26 +68,17 @@ function MatchTeamsDisplay({
   const title = [local, visitor].filter(Boolean).join(" – ") || undefined;
   return (
     <div
-      className="flex min-w-0 flex-col gap-1.5 overflow-hidden"
+      className="flex min-w-0 flex-col gap-0.5 overflow-hidden text-sm"
       title={title}
     >
       {localStr ? (
-        <Badge
-          variant="default"
-          className="max-w-full shrink-0 truncate justify-start font-medium"
-        >
-          {localStr}
-        </Badge>
+        <span className="min-w-0 truncate text-foreground">{localStr}</span>
       ) : null}
       {visitorStr ? (
-        <Badge
-          className="max-w-full shrink-0 truncate justify-start border-transparent bg-chart-3/15 font-medium text-chart-3"
-        >
-          {visitorStr}
-        </Badge>
+        <span className="min-w-0 truncate text-muted-foreground">{visitorStr}</span>
       ) : null}
       {!localStr && !visitorStr ? (
-        <span className="text-sm font-medium text-muted-foreground">Partido</span>
+        <span className="text-muted-foreground">Partido</span>
       ) : null}
     </div>
   );
@@ -97,7 +88,7 @@ function MatchTeamsDisplay({
 function WeeklySummaryCard({ totalNet, totalGross }: { totalNet: number; totalGross: number }) {
   return (
     <Card className="border-primary/20 bg-primary/5">
-      <CardContent className="flex flex-row items-center justify-between gap-4 pt-6">
+      <CardContent className="flex flex-row items-center justify-between gap-4 pt-4">
         <div className="flex items-center gap-3">
           <div className="flex size-12 items-center justify-center rounded-full bg-primary/15">
             <Wallet className="size-6 text-primary" aria-hidden />
@@ -147,7 +138,8 @@ function WeeklySection({ items }: { items: PreliquidationWeeklyItem[] }) {
                   <div className="flex flex-wrap items-center gap-2">
                     <MatchTeamsDisplay local={item.localTeamName} visitor={item.visitorTeamName} />
                     {item.categoryName && (
-                      <Badge variant="secondary" className="text-xs font-normal">
+                      <Badge variant="secondary" className="border-border bg-white text-xs font-normal text-foreground">
+                        <Trophy className="mr-1 size-3" aria-hidden />
                         {item.categoryName}
                       </Badge>
                     )}

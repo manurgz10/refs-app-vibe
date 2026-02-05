@@ -9,6 +9,7 @@ import type { MyMatchDesignation } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { PartidosTabsClient } from "./partidos-tabs-client";
+import { SharePartidosButton, PARTIDOS_LIST_SHARE_ID } from "./share-partidos-button";
 import { CalendarDays, MapPin, Medal, Trophy, UserRound } from "lucide-react";
 import { designationRoleOrder, getGoogleMapsDirectionsUrl } from "@/lib/utils";
 
@@ -144,7 +145,10 @@ function MyMatchesView({
 }) {
   return (
     <div className="space-y-6">
-      <h1 className="page-title">Partidos de esta semana</h1>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h1 className="page-title">Partidos de esta semana</h1>
+        {matches.length > 0 && <SharePartidosButton />}
+      </div>
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-base">Designaciones</CardTitle>
@@ -165,7 +169,7 @@ function MyMatchesView({
               </p>
             </div>
           ) : (
-            <div className="divide-y divide-border">
+            <div id={PARTIDOS_LIST_SHARE_ID} className="divide-y divide-border">
               {matches.map((m) => (
                 <MyMatchRow
                   key={m.designationId}
