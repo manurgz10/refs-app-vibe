@@ -1,8 +1,6 @@
+"use client";
+
 import { HistoricoLiquidacionesClient } from "@/app/(dashboard)/liquidaciones/historico-liquidaciones-client";
-import { auth } from "@/lib/auth";
-import { getLiquidaciones } from "@/lib/services/liquidaciones";
-import { getPaymentsNotPending } from "@/lib/services/payments-not-pending";
-import { getPreliquidationWeekly } from "@/lib/services/preliquidation-weekly";
 import type { Liquidacion } from "@/lib/types";
 import type { PaymentNotPending } from "@/lib/types";
 import type { PreliquidationWeeklyItem } from "@/lib/types";
@@ -24,6 +22,8 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Wallet, CalendarDays, Receipt, Trophy } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import type { LiquidacionesDashboardResponse } from "@/app/api/liquidaciones/dashboard/route";
 
 function formatEuro(n: number) {
   return new Intl.NumberFormat("es-ES", {
@@ -88,17 +88,17 @@ function MatchTeamsDisplay({
 function WeeklySummaryCard({ totalNet, totalGross }: { totalNet: number; totalGross: number }) {
   return (
     <Card className="border-primary/20 bg-primary/5">
-      <CardContent className="flex flex-row items-center justify-between gap-4 pt-4">
+      <CardContent className="flex flex-row items-center justify-between gap-4 px-4">
         <div className="flex items-center gap-3">
           <div className="flex size-12 items-center justify-center rounded-full bg-primary/15">
             <Wallet className="size-6 text-primary" aria-hidden />
           </div>
           <div>
-            <p className="text-sm font-medium text-muted-foreground">Total pendiente esta semana</p>
+            <p className="text-sm font-medium text-muted-foreground">Total neto</p>
             <p className="text-2xl font-bold tabular-nums text-primary">{formatEuro(totalNet)}</p>
           </div>
         </div>
-        <Badge variant="secondary" className="shrink-0 text-xs">
+        <Badge variant="secondary" className="shrink-0 px-3 py-1.5 text-sm font-medium tabular-nums">
           Bruto {formatEuro(totalGross)}
         </Badge>
       </CardContent>
@@ -113,22 +113,21 @@ function WeeklySection({ items }: { items: PreliquidationWeeklyItem[] }) {
 
   return (
     <section className="space-y-4">
-      <div className="flex items-center gap-2">
+      <div className="flex h-8 items-center gap-2">
         <CalendarDays className="size-5 text-muted-foreground" aria-hidden />
         <h2 className="text-lg font-semibold">Esta semana</h2>
         <Badge variant="outline" className="text-xs">
-          {items.length} liquidación{items.length !== 1 ? "es" : ""}
+          {items.length} liquidacion{items.length !== 1 ? "es" : ""}
         </Badge>
       </div>
       <WeeklySummaryCard totalNet={totalNet} totalGross={totalGross} />
+      <div className="space-y-1">
+        <div className="flex h-8 items-center gap-2">
+          <Wallet className="size-5 text-muted-foreground" aria-hidden />
+          <h3 className="text-base font-semibold">Desglose por partido</h3>
+        </div>
+      </div>
       <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-base">
-            <Receipt className="size-4" aria-hidden />
-            Desglose por partido
-          </CardTitle>
-          <CardDescription>Bruto y neto de cada designación</CardDescription>
-        </CardHeader>
         <CardContent>
           <div className="space-y-0">
             {items.map((item, index) => (
@@ -175,7 +174,7 @@ function ApiView({
   historico: PaymentNotPending[];
 }) {
   return (
-    <div className="space-y-8">
+    <div className="space-y-4 pb-4">
       {weekly.length > 0 && <WeeklySection items={weekly} />}
       <section className="space-y-4">
         <HistoricoLiquidacionesClient payments={historico} />
@@ -189,7 +188,7 @@ function FallbackView({ liquidaciones }: { liquidaciones: Liquidacion[] }) {
   const total = liquidaciones.reduce((sum, l) => sum + l.importe, 0);
 
   return (
-    <div className="space-y-6 md:space-y-8">
+    <div className="space-y-4 pb-4">
       <h1 className="page-title">Liquidaciones</h1>
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -238,30 +237,43 @@ function FallbackView({ liquidaciones }: { liquidaciones: Liquidacion[] }) {
   );
 }
 
-export default async function LiquidacionesPage() {
-  const session = await auth();
-  const accessToken = (session as { accessToken?: string })?.accessToken;
+async function fetchLiquidacionesDashboard(): Promise<LiquidacionesDashboardResponse> {
+  const res = await fetch("/api/liquidaciones/dashboard");
+  if (!res.ok) {
+    throw new Error("No se pudieron cargar las liquidaciones");
+  }
+  return res.json() as Promise<LiquidacionesDashboardResponse>;
+}
 
-  const useRealApi =
-    accessToken &&
-    process.env.EXTERNAL_API_URL &&
-    process.env.USE_MOCK_API !== "true";
+export default function LiquidacionesPage() {
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ["liquidaciones-dashboard"],
+    queryFn: fetchLiquidacionesDashboard,
+    staleTime: 5 * 60 * 1000,
+  });
 
-  if (useRealApi) {
-    try {
-      const [weekly, historico] = await Promise.all([
-        getPreliquidationWeekly(accessToken!),
-        getPaymentsNotPending(accessToken!),
-      ]);
-      const historicoRecientePrimero = [...historico].sort(
-        (a, b) => new Date(b.finalControlDate).getTime() - new Date(a.finalControlDate).getTime()
-      );
-      return <ApiView weekly={weekly} historico={historicoRecientePrimero} />;
-    } catch {
-      // Fallback
-    }
+  if (isLoading && !data) {
+    return (
+      <div className="py-10 text-center text-sm text-muted-foreground">
+        Cargando liquidaciones...
+      </div>
+    );
   }
 
-  const liquidaciones = await getLiquidaciones(accessToken);
-  return <FallbackView liquidaciones={liquidaciones} />;
+  if (isError && !data) {
+    return (
+      <div className="py-10 text-center text-sm text-destructive">
+        No se pudieron cargar las liquidaciones.
+      </div>
+    );
+  }
+
+  if (data?.mode === "api") {
+    const historicoRecientePrimero = [...data.historico].sort(
+      (a, b) => new Date(b.finalControlDate).getTime() - new Date(a.finalControlDate).getTime()
+    );
+    return <ApiView weekly={data.weekly} historico={historicoRecientePrimero} />;
+  }
+
+  return <FallbackView liquidaciones={data?.mode === "fallback" ? data.liquidaciones : []} />;
 }

@@ -132,14 +132,14 @@ export function SharePartidosButton() {
         size="sm"
         onClick={handleShare}
         disabled={loading}
-        aria-label="Compartir todos los partidos"
+        aria-label="Compartir"
       >
         {loading ? (
           <Loader2 className="mr-2 size-4 animate-spin" aria-hidden />
         ) : (
           <Share2 className="mr-2 size-4" aria-hidden />
         )}
-        Compartir partidos
+        Compartir
       </Button>
       {error && (
         <p className="text-xs text-destructive" role="alert">

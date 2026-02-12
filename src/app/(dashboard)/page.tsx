@@ -1,12 +1,9 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
-import { auth } from "@/lib/auth";
-import { getDesignationsStatus } from "@/lib/services/designations-status";
-import { getMyMatches } from "@/lib/services/my-matches";
-import { getMatchDetail } from "@/lib/services/match-detail";
-import { getPartidos } from "@/lib/services/partidos";
 import type { Partido } from "@/lib/types";
-import type { DesignationsStatus, MyMatchDesignation } from "@/lib/types";
+import type { MyMatchDesignation } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,9 +12,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Countdown } from "@/components/countdown";
 import { getGoogleMapsDirectionsUrl } from "@/lib/utils";
 import { CalendarDays, MapPin, Trophy } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import type { InicioDashboardResponse } from "@/app/api/inicio/dashboard/route";
 
 const MAX_LOCATION_CHARS = 32;
 
@@ -173,61 +173,71 @@ function NextMatchCardMock({ p }: { p: Partido }) {
   );
 }
 
-export default async function DashboardPage() {
-  const session = await auth();
-  const accessToken = (session as { accessToken?: string })?.accessToken;
-
-  const useRealApi = accessToken && process.env.EXTERNAL_API_URL && process.env.USE_MOCK_API !== "true";
-  let myMatches: MyMatchDesignation[] = [];
-  let designationsStatus: DesignationsStatus | null = null;
-  if (useRealApi) {
-    try {
-      const [matches, status] = await Promise.all([
-        getMyMatches(accessToken!),
-        getDesignationsStatus(accessToken!),
-      ]);
-      myMatches = matches;
-      designationsStatus = status;
-    } catch {
-      // Fallback a getPartidos
-    }
+async function fetchInicioDashboard(): Promise<InicioDashboardResponse> {
+  const res = await fetch("/api/inicio/dashboard");
+  if (!res.ok) {
+    throw new Error("No se pudo cargar el inicio");
   }
+  return res.json() as Promise<InicioDashboardResponse>;
+}
 
-  const partidos = myMatches.length > 0 ? [] : await getPartidos(accessToken);
-  const pendientes = partidos.filter((p) => p.estado === "pendiente");
+export default function DashboardPage() {
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ["inicio-dashboard"],
+    queryFn: fetchInicioDashboard,
+    staleTime: 5 * 60 * 1000,
+  });
 
-  // Próximo partido: API → primer partido futuro de myMatches; Mock → primer pendiente
-  let nextMatchApi: MyMatchDesignation | null = null;
-  let nextMatchDetail: { localClubLogo?: string | null; visitorClubLogo?: string | null } | null = null;
-  let nextMatchMock: Partido | null = null;
-
-  if (myMatches.length > 0) {
-    const now = Date.now();
-    const sorted = [...myMatches].sort((a, b) => new Date(a.matchDay).getTime() - new Date(b.matchDay).getTime());
-    nextMatchApi = sorted.find((m) => new Date(m.matchDay).getTime() >= now) ?? sorted[0] ?? null;
-    if (nextMatchApi) {
-      try {
-        const detail = await getMatchDetail(String(nextMatchApi.matchId));
-        const match = detail.messageData?.match;
-        if (match) {
-          nextMatchDetail = {
-            localClubLogo: match.localClubLogo,
-            visitorClubLogo: match.visitorClubLogo,
-          };
-        }
-      } catch {
-        // Sin logos
-      }
-    }
-  } else if (pendientes.length > 0) {
-    nextMatchMock = pendientes[0];
-  }
-
+  const nextMatchApi: MyMatchDesignation | null = data?.nextMatchApi ?? null;
+  const nextMatchDetail = data?.nextMatchDetail ?? null;
+  const nextMatchMock: Partido | null = data?.nextMatchMock ?? null;
+  const designationsStatus = data?.designationsStatus ?? null;
   const hasNextMatch = nextMatchApi ?? nextMatchMock;
+  const refereeName = data?.refereeName || "árbitro";
+
+  if (isLoading && !data) {
+    return (
+      <div className="space-y-6 md:space-y-8">
+        <Skeleton className="h-8 w-40" />
+        <section className="flex w-full flex-col gap-2">
+          <Skeleton className="h-12 w-full rounded-lg" />
+          <Skeleton className="h-12 w-full rounded-lg" />
+        </section>
+        <section className="space-y-3">
+          <div className="flex items-center justify-between">
+            <Skeleton className="h-5 w-36" />
+            <Skeleton className="h-8 w-24 rounded-md" />
+          </div>
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex flex-col items-center gap-4">
+                <div className="flex items-center justify-center gap-4">
+                  <div className="flex flex-col items-center gap-2">
+                    <Skeleton className="h-12 w-12 rounded-full" />
+                    <Skeleton className="h-3 w-20" />
+                  </div>
+                  <Skeleton className="h-4 w-4 rounded-full" />
+                  <div className="flex flex-col items-center gap-2">
+                    <Skeleton className="h-12 w-12 rounded-full" />
+                    <Skeleton className="h-3 w-20" />
+                  </div>
+                </div>
+                <Skeleton className="h-4 w-48" />
+                <Skeleton className="h-8 w-32 rounded-md" />
+              </div>
+            </CardContent>
+          </Card>
+        </section>
+        <section>
+          <Skeleton className="h-10 w-40 rounded-md" />
+        </section>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 md:space-y-8">
-      <h1 className="page-title">Inicio</h1>
+      <h1 className="page-title">Hola {refereeName},</h1>
 
       {/* Designaciones: solo si hay descargadas o pendientes. Ancho completo, texto completo, color propio. */}
       {designationsStatus !== null &&

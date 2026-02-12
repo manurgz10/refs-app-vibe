@@ -29,8 +29,16 @@ export async function externalFetch<T = unknown>(
   if (accessToken) {
     (headers as Record<string, string>)["Authorization"] = `Bearer ${accessToken}`;
   }
+  const method = (fetchOptions.method ?? "GET").toUpperCase();
+  const cacheOptions =
+    method === "GET"
+      ? {
+          cache: "force-cache" as RequestCache,
+          next: { revalidate: 5 * 60 },
+        }
+      : {};
 
-  const res = await fetch(url, { ...fetchOptions, headers });
+  const res = await fetch(url, { ...fetchOptions, headers, ...cacheOptions });
   if (!res.ok) {
     const text = await res.text();
     throw new Error(`API externa error ${res.status}: ${text || res.statusText}`);

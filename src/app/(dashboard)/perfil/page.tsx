@@ -1,5 +1,5 @@
-import { auth } from "@/lib/auth";
-import { getRefereePersonalData } from "@/lib/services/referee";
+"use client";
+
 import type { RefereePersonalData } from "@/lib/types";
 import { SignOutButton } from "@/components/sign-out-button";
 import { Badge } from "@/components/ui/badge";
@@ -10,26 +10,33 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-export default async function PerfilPage() {
-  const session = await auth();
-  const accessToken = (session as { accessToken?: string })?.accessToken;
+import { useQuery } from "@tanstack/react-query";
+import type { PerfilDashboardResponse } from "@/app/api/perfil/dashboard/route";
 
-  if (!accessToken) {
+async function fetchPerfil(): Promise<PerfilDashboardResponse> {
+  const res = await fetch("/api/perfil/dashboard");
+  if (!res.ok) {
+    throw new Error("No se pudieron cargar los datos");
+  }
+  return res.json() as Promise<PerfilDashboardResponse>;
+}
+
+export default function PerfilPage() {
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ["perfil"],
+    queryFn: fetchPerfil,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  if (isLoading && !data) {
     return (
-      <Card className="border-destructive/50">
-        <CardContent className="pt-6">
-          <p className="text-sm text-destructive">
-            No se pudo cargar la información. Inicia sesión de nuevo.
-          </p>
-        </CardContent>
-      </Card>
+      <div className="py-10 text-center text-sm text-muted-foreground">
+        Cargando perfil...
+      </div>
     );
   }
 
-  let data: RefereePersonalData;
-  try {
-    data = await getRefereePersonalData(accessToken);
-  } catch {
+  if (isError && !data) {
     return (
       <Card className="border-destructive/50">
         <CardContent className="pt-6">
@@ -41,17 +48,30 @@ export default async function PerfilPage() {
     );
   }
 
-  const fullName = [data.name, data.lastName].filter(Boolean).join(" ").trim() || "";
-  const phone = data.phoneMobile || data.phoneParticular || data.phoneWork || null;
-  const location = [data.address, data.postalCode, data.townName].filter(Boolean).join(", ") || null;
+  const profile: RefereePersonalData | null = data?.data ?? null;
+  if (!profile) {
+    return (
+      <Card className="border-destructive/50">
+        <CardContent className="pt-6">
+          <p className="text-sm text-destructive">
+            No se pudieron cargar los datos.
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const fullName = [profile.name, profile.lastName].filter(Boolean).join(" ").trim() || "";
+  const phone = profile.phoneMobile || profile.phoneParticular || profile.phoneWork || null;
+  const location = [profile.address, profile.postalCode, profile.townName].filter(Boolean).join(", ") || null;
 
   const items: { label: string; value: string }[] = [
     { label: "Nombre", value: fullName },
-    { label: "Nº árbitro", value: String(data.refereeNumber ?? "") },
-    { label: "Email", value: data.email || "" },
+    { label: "Nº árbitro", value: String(profile.refereeNumber ?? "") },
+    { label: "Email", value: profile.email || "" },
     { label: "Teléfono", value: phone || "" },
-    { label: "Localidad", value: location || data.townName || "" },
-    { label: "Categoría", value: data.categoryName || "" },
+    { label: "Localidad", value: location || profile.townName || "" },
+    { label: "Categoría", value: profile.categoryName || "" },
   ].filter((i) => i.value.trim() !== "");
 
   return (
@@ -73,16 +93,7 @@ export default async function PerfilPage() {
               </div>
             ))}
           </dl>
-          {(data.active != null || data.enabled != null) && (
-            <div className="flex flex-wrap gap-2 pt-4">
-              {data.active != null && (
-                <Badge variant={data.active ? "success" : "secondary"}>
-                  {data.active ? "Activo" : "Inactivo"}
-                </Badge>
-              )}
-            </div>
-          )}
-          <div className="mt-6 border-t border-border pt-6">
+          <div className="border-t border-border pt-6">
             <SignOutButton />
           </div>
         </CardContent>

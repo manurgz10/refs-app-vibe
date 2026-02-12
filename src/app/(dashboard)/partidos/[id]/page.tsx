@@ -92,14 +92,16 @@ export default async function PartidoDetailPage({
 
   return (
     <div className="space-y-6 pb-6">
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2 mb-4">
         <Button variant="ghost" size="sm" asChild>
           <Link href="/partidos">
             <ArrowLeft className="mr-2 size-4" aria-hidden />
             Volver a Partidos
           </Link>
         </Button>
-        <SharePartidoButton />
+        <div className="ml-auto">
+          <SharePartidoButton />
+        </div>
       </div>
 
       <div id={SHARE_AREA_ID} className="space-y-6">
@@ -107,7 +109,7 @@ export default async function PartidoDetailPage({
       <Card>
         <CardContent className="pt-6">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-center gap-4">
+            <div className="flex w-full items-center justify-center gap-4 text-center sm:w-auto sm:text-left">
               <div className="flex flex-col items-center gap-1 text-center">
                 {match.localClubLogo ? (
                   <img
@@ -151,7 +153,7 @@ export default async function PartidoDetailPage({
                 </span>
               </div>
             </div>
-            <div className="flex flex-col items-start gap-1 border-t border-border pt-4 sm:border-t-0 sm:border-l sm:pt-0 sm:pl-4">
+            <div className="flex flex-col items-center gap-1 border-t border-border pt-4 text-center sm:items-start sm:text-left sm:border-t-0 sm:border-l sm:pt-0 sm:pl-4">
               <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
                 <CalendarDays className="size-4" aria-hidden />
                 {formatMatchDay(match.matchDay)}

@@ -1,9 +1,7 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
-import { auth } from "@/lib/auth";
-import { getMyMatches } from "@/lib/services/my-matches";
-import { getMatchDetail } from "@/lib/services/match-detail";
-import { getPartidos } from "@/lib/services/partidos";
 import type { Partido } from "@/lib/types";
 import type { MyMatchDesignation } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
@@ -12,8 +10,21 @@ import { PartidosTabsClient } from "./partidos-tabs-client";
 import { SharePartidosButton, PARTIDOS_LIST_SHARE_ID } from "./share-partidos-button";
 import { CalendarDays, MapPin, Medal, Trophy, UserRound } from "lucide-react";
 import { designationRoleOrder, getGoogleMapsDirectionsUrl } from "@/lib/utils";
+import { useQuery } from "@tanstack/react-query";
+import { useMemo } from "react";
 
 export type MatchLogos = { localClubLogo: string | null; visitorClubLogo: string | null };
+type DashboardResponse =
+  | {
+      mode: "my-matches";
+      matches: MyMatchDesignation[];
+      logosByMatchId: Record<string, MatchLogos>;
+      companionsByMatchId: Record<string, string>;
+    }
+  | {
+      mode: "partidos";
+      partidos: Partido[];
+    };
 
 /** Solo roles de árbitro (pitar), no anotador ni cronometrador. */
 function isRefereeRole(role: string | null | undefined): boolean {
@@ -72,7 +83,7 @@ function MyMatchRow({
   const address = getMatchAddress(m);
 
   return (
-    <div className="flex gap-3 border-b border-border py-4 last:border-0 last:pb-0">
+    <div className="flex gap-3 border-b border-border py-4 first:pt-0 last:border-0 last:pb-0">
       <Link
         href={"/partidos/" + m.matchId}
         className="flex shrink-0 flex-col items-center rounded-lg bg-primary/10 px-2.5 py-1.5 text-center transition-colors hover:bg-primary/20"
@@ -140,11 +151,11 @@ function MyMatchesView({
   companionsByMatchId,
 }: {
   matches: MyMatchDesignation[];
-  logosByMatchId: Map<number, MatchLogos>;
-  companionsByMatchId: Map<number, string>;
+  logosByMatchId: Record<string, MatchLogos>;
+  companionsByMatchId: Record<string, string>;
 }) {
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 pb-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <CalendarDays className="size-5 shrink-0 text-muted-foreground" aria-hidden />
@@ -161,7 +172,7 @@ function MyMatchesView({
             <CardDescription>No tienes partidos asignados esta semana</CardDescription>
           </CardHeader>
         )}
-        <CardContent className={matches.length === 0 ? "pt-2" : "pt-6"}>
+        <CardContent className={matches.length === 0 ? "pt-2" : "pt-0"}>
           {matches.length === 0 ? (
             <div className="py-10">
               <div className="mx-auto flex max-w-[100px] justify-center text-muted-foreground/40">
@@ -177,8 +188,8 @@ function MyMatchesView({
                 <MyMatchRow
                   key={m.designationId}
                   m={m}
-                  logos={logosByMatchId.get(m.matchId)}
-                  companions={companionsByMatchId.get(m.matchId)}
+                  logos={logosByMatchId[String(m.matchId)]}
+                  companions={companionsByMatchId[String(m.matchId)]}
                 />
               ))}
             </div>
@@ -195,7 +206,7 @@ function FallbackPartidosView({ partidos }: { partidos: Partido[] }) {
   const finalizados = partidos.filter((p) => p.estado === "finalizado");
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 pb-3">
       <h1 className="page-title">Partidos</h1>
       <Card>
         <PartidosTabsClient pendientes={pendientes} finalizados={finalizados} />
@@ -204,53 +215,49 @@ function FallbackPartidosView({ partidos }: { partidos: Partido[] }) {
   );
 }
 
-export default async function PartidosPage() {
-  const session = await auth();
-  const accessToken = (session as { accessToken?: string })?.accessToken;
+async function fetchPartidosDashboard(): Promise<DashboardResponse> {
+  const res = await fetch("/api/partidos/dashboard");
+  if (!res.ok) {
+    throw new Error("No se pudieron cargar los partidos");
+  }
+  return res.json() as Promise<DashboardResponse>;
+}
 
-  if (accessToken && process.env.EXTERNAL_API_URL && process.env.USE_MOCK_API !== "true") {
-    try {
-      const myMatches = await getMyMatches(accessToken);
-      const logosByMatchId = new Map<number, MatchLogos>();
-      const companionsByMatchId = new Map<number, string>();
-      const currentUserName = session?.user?.name ?? null;
+export default function PartidosPage() {
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ["partidos-dashboard"],
+    queryFn: fetchPartidosDashboard,
+    staleTime: 5 * 60 * 1000,
+  });
 
-      await Promise.all(
-        myMatches.map(async (m) => {
-          try {
-            const detail = await getMatchDetail(String(m.matchId));
-            const match = detail.messageData?.match;
-            const designations = detail.messageData?.designations ?? [];
-            if (match) {
-              logosByMatchId.set(m.matchId, {
-                localClubLogo: match.localClubLogo ?? null,
-                visitorClubLogo: match.visitorClubLogo ?? null,
-              });
-            }
-            if (designations.length > 0) {
-              const companions = getCompanionsLabel(
-                designations as { refereeName: string; refereeSurname: string; refereeRole?: string }[],
-                currentUserName
-              );
-              companionsByMatchId.set(m.matchId, companions);
-            }
-          } catch {
-            // Sin datos extra para este partido
-          }
-        })
-      );
-      return (
-        <MyMatchesView
-          matches={myMatches}
-          logosByMatchId={logosByMatchId}
-          companionsByMatchId={companionsByMatchId}
-        />
-      );
-    } catch {
-      // Fallback
-    }
+  const logosByMatchId = useMemo(() => data && data.mode === "my-matches" ? data.logosByMatchId : {}, [data]);
+  const companionsByMatchId = useMemo(() => data && data.mode === "my-matches" ? data.companionsByMatchId : {}, [data]);
+
+  if (isLoading && !data) {
+    return (
+      <div className="py-10 text-center text-sm text-muted-foreground">
+        Cargando partidos...
+      </div>
+    );
   }
 
-  const partidos = await getPartidos(accessToken);
-  return <FallbackPartidosView partidos={partidos} />;
+  if (isError && !data) {
+    return (
+      <div className="py-10 text-center text-sm text-destructive">
+        No se pudieron cargar los partidos.
+      </div>
+    );
+  }
+
+  if (data?.mode === "my-matches") {
+    return (
+      <MyMatchesView
+        matches={data.matches}
+        logosByMatchId={logosByMatchId}
+        companionsByMatchId={companionsByMatchId}
+      />
+    );
+  }
+
+  return <FallbackPartidosView partidos={data?.mode === "partidos" ? data.partidos : []} />;
 }

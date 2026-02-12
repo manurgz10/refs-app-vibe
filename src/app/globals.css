@@ -145,3 +145,12 @@ html, body {
   overscroll-behavior-y: none; /* Bloquea el rebote */
   background-color: #ffffff;   /* Asegura que el fondo base sea blanco */
 }
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

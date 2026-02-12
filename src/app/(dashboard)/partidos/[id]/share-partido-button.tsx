@@ -178,7 +178,7 @@ export function SharePartidoButton() {
         ) : (
           <Share2 className="mr-2 size-4" aria-hidden />
         )}
-        Compartir partido
+        Compartir
       </Button>
       {error && (
         <p className="text-xs text-destructive" role="alert">
