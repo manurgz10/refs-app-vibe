@@ -19,9 +19,9 @@ export default function DashboardLayout({
           <Image
             src="/logo1.png"
             alt="Árbitros"
-            width={280}
-            height={64}
-            className="h-11 w-auto md:h-12"
+            width={320}
+            height={80}
+            className="h-14 w-auto md:h-16"
             priority
           />
         </header>

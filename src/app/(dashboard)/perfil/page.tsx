@@ -11,17 +11,23 @@ import { Settings, UserRound } from "lucide-react";
 type SessionWithProfile = { profile?: RefereePersonalData | Record<string, unknown> };
 
 export default async function PerfilPage() {
+  debugger;
   const session = (await auth()) as (SessionWithProfile | null);
   const profile = (session?.profile ?? null) as RefereePersonalData | null;
   if (!profile) {
     return (
-      <Card className="border-destructive/50">
-        <CardContent className="pt-6">
-          <p className="text-sm text-destructive">
-            No se pudieron cargar los datos.
-          </p>
-        </CardContent>
-      </Card>
+      <div className="space-y-6">
+        <Card className="border-destructive/50">
+          <CardContent>
+            <p className="text-sm text-destructive">
+              No se pudieron cargar los datos.
+            </p>
+          </CardContent>
+        </Card>
+        <div className="border-t border-border pt-6">
+          <SignOutButton />
+        </div>
+      </div>
     );
   }
 

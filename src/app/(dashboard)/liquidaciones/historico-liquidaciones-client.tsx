@@ -4,7 +4,7 @@ import { useRef } from "react";
 import type { PaymentNotPending } from "@/lib/types";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { History, Banknote } from "lucide-react";
+import { History, HandCoins } from "lucide-react";
 
 function formatEuro(n: number) {
   return new Intl.NumberFormat("es-ES", {
@@ -17,18 +17,19 @@ function formatEuro(n: number) {
 
 function formatPeriod(initial: string, final: string) {
   const a = new Date(initial);
-  const b = new Date(final);
-  return `${a.toLocaleDateString("es-ES", { month: "short", year: "numeric" })} – ${b.toLocaleDateString("es-ES", { month: "short", year: "numeric" })}`;
+  const month = a.toLocaleDateString("es-ES", { month: "long" }).toUpperCase();
+  const year = a.toLocaleDateString("es-ES", { year: "2-digit" });
+  return `${month} ${year}`;
 }
 
 function HistoricoPaymentCard({ p }: { p: PaymentNotPending }) {
   const period = formatPeriod(p.initialControlDate, p.finalControlDate);
   return (
     <div
-      className="flex w-full min-w-full max-w-full shrink-0 flex-col gap-4 rounded-xl border border-border bg-card p-5 shadow-sm snap-start md:w-[calc(50%-0.5rem)] md:min-w-[calc(50%-0.5rem)]"
+      className="flex w-full min-w-full max-w-full shrink-0 flex-col gap-1 rounded-xl border border-border bg-card p-5 shadow-sm snap-start md:w-[calc(50%-0.5rem)] md:min-w-[calc(50%-0.5rem)]"
       style={{ scrollSnapStop: "always" }}
     >
-      <Badge variant="outline" className="w-fit text-xs font-medium">
+      <Badge variant="outline" className="mx-auto w-fit text-xs font-medium">
         {period}
       </Badge>
       <div className="space-y-3">
@@ -49,11 +50,11 @@ function HistoricoPaymentCard({ p }: { p: PaymentNotPending }) {
           <span className="tabular-nums font-medium">{formatEuro(p.netAmount)}</span>
         </div>
       </div>
-      <div className="mt-auto rounded-lg bg-emerald-500/10 px-3 py-2.5">
+      <div className="mt-2.5 rounded-lg bg-emerald-500/10 px-3 py-2.5">
         <div className="flex items-center justify-between gap-2">
           <span className="flex items-center gap-1.5 text-xs font-medium text-emerald-700 dark:text-emerald-400">
-            <Banknote className="size-3.5" aria-hidden />
-            A cobrar
+            PAGADO
+            <HandCoins className="size-3.5" aria-hidden />
           </span>
           <span className="text-lg font-bold tabular-nums text-emerald-700 dark:text-emerald-400">
             {formatEuro(p.toPayAmount)}

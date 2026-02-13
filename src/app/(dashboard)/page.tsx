@@ -61,7 +61,7 @@ function NextMatchCard({
 
   return (
     <Card>
-      <CardContent className="pt-6">
+      <CardContent className="pt-2">
         <div className="flex flex-col gap-4">
           <Link href={`/partidos/${m.matchId}`} className="block transition-opacity hover:opacity-95">
             <div className="flex items-center justify-center gap-4">
@@ -272,7 +272,7 @@ export default function DashboardPage() {
 
       {/* Próximo partido: un solo partido con logos, categoría, horario, lugar y countdown */}
       <section>
-        <div className="mb-3 flex items-center justify-between">
+        <div className="mb-4 flex items-center justify-between">
           <h2 className="text-base font-semibold text-foreground">Próximo partido</h2>
           <Button variant="outline" size="sm" asChild>
             <Link href="/partidos">Ver todos</Link>
@@ -299,7 +299,7 @@ export default function DashboardPage() {
         )}
       </section>
 
-      <section className="pt-2">
+      <section className="mb-5">
         <Button variant="outline" className="w-full sm:w-auto" asChild>
           <Link href="/liquidaciones">Ver liquidaciones</Link>
         </Button>

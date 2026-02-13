@@ -4,6 +4,7 @@ import Image from "next/image";
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
+import { Lock, Unlock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -21,6 +22,7 @@ function LoginForm() {
   const errorParam = searchParams.get("error");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(
     errorParam === "CredentialsSignin" ? "Credenciales incorrectas." : null
@@ -55,30 +57,26 @@ function LoginForm() {
 
   return (
     <div className="flex min-h-[100dvh] min-h-screen flex-col items-center justify-center bg-linear-to-br from-primary/5 via-background to-primary/10 p-4">
-      <div className="mb-6 flex items-center justify-center">
+      <div className="flex items-center justify-center -mb-10">
         <Image
           src="/logo1.png"
           alt="Árbitros"
-          width={200}
-          height={80}
-          className="h-auto w-auto max-w-[200px]"
+          width={360}
+          height={144}
+          className="block h-auto w-auto max-w-[360px]"
           priority
         />
       </div>
       <Card className="w-full max-w-sm shadow-lg">
-        <CardHeader className="space-y-1">
-          <CardTitle className="sr-only">Árbitros</CardTitle>
-          <CardDescription>Inicia sesión para acceder a tu panel</CardDescription>
-        </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-5">
             {error && (
               <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
                 {error}
               </p>
             )}
             <div className="space-y-2">
-              <Label htmlFor="username">Usuario</Label>
+              <Label htmlFor="username">Correo electrónico</Label>
               <Input
                 id="username"
                 name="username"
@@ -87,21 +85,36 @@ function LoginForm() {
                 required
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                placeholder="Usuario"
+                placeholder="ejemplo@mail.com"
               />
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">Contraseña</Label>
-              <Input
-                id="password"
-                name="password"
-                type="password"
-                autoComplete="current-password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Contraseña"
-              />
+              <div className="relative">
+                <Input
+                  id="password"
+                  name="password"
+                  type={showPassword ? "text" : "password"}
+                  autoComplete="current-password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Introduce tu clave"
+                  className="pr-20"
+                />
+                <button
+                  type="button"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  aria-label={showPassword ? "Ocultar clave" : "Mostrar clave"}
+                >
+                  {showPassword ? (
+                    <Unlock className="size-4" aria-hidden />
+                  ) : (
+                    <Lock className="size-4" aria-hidden />
+                  )}
+                </button>
+              </div>
             </div>
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? "Entrando…" : "Entrar"}

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { designationRoleOrder, getGoogleMapsDirectionsUrl } from "@/lib/utils";
-import { ArrowLeft, CalendarDays, MapPin, Users, Trophy, Award, Navigation } from "lucide-react";
+import { ArrowLeft, CalendarDays, MapPin, Users, Trophy, Award, Navigation, Medal } from "lucide-react";
 import { SharePartidoButton, SHARE_AREA_ID } from "./share-partido-button";
 
 function formatMatchDay(matchDay: string | null | undefined) {
@@ -33,9 +33,8 @@ function VenueBlock({ m }: { m: FitxaPartitMatch }) {
   const displayAddress = [m.nameField, addressOnly].filter(Boolean).join(" · ") || nameField || "";
   return (
     <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
-      <div className="flex min-w-0 flex-1 items-start gap-2 text-sm">
-        <MapPin className="mt-0.5 size-4 shrink-0 text-muted-foreground" aria-hidden />
-        <p className="min-w-0 text-foreground">{displayAddress}</p>
+      <div className="min-w-0 flex-1 text-sm text-foreground">
+        <p className="min-w-0">{displayAddress}</p>
       </div>
       {forMaps && (
         <Button variant="outline" size="sm" asChild className="shrink-0">
@@ -107,7 +106,7 @@ export default async function PartidoDetailPage({
       <div id={SHARE_AREA_ID} className="space-y-6">
       {/* Encabezado: equipos y fecha */}
       <Card>
-        <CardContent className="pt-6">
+        <CardContent className="pt-2">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex w-full items-center justify-center gap-4 text-center sm:w-auto sm:text-left">
               <div className="flex flex-col items-center gap-1 text-center">
@@ -153,7 +152,7 @@ export default async function PartidoDetailPage({
                 </span>
               </div>
             </div>
-            <div className="flex flex-col items-center gap-1 border-t border-border pt-4 text-center sm:items-start sm:text-left sm:border-t-0 sm:border-l sm:pt-0 sm:pl-4">
+            <div className="flex flex-col items-center gap-3 border-t border-border pt-4 text-center sm:items-start sm:text-left sm:border-t-0 sm:border-l sm:pt-0 sm:pl-4">
               <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
                 <CalendarDays className="size-4" aria-hidden />
                 {formatMatchDay(match.matchDay)}
@@ -170,16 +169,16 @@ export default async function PartidoDetailPage({
       </Card>
 
       {/* Categoría y competición */}
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2 justify-center">
         {match.nameCategory && (
-          <Badge variant="secondary" className="text-xs">
-            <Trophy className="mr-1 size-3" aria-hidden />
+          <Badge variant="secondary" className="inline-flex items-center gap-1 text-xs">
+            <Trophy className="size-3" aria-hidden />
             {match.nameCategory}
           </Badge>
         )}
         {match.nameCompetition && (
-          <Badge variant="outline" className="text-xs">
-            <Award className="mr-1 size-3" aria-hidden />
+          <Badge variant="outline" className="inline-flex items-center gap-1 text-xs">
+            <Award className="size-3" aria-hidden />
             {match.nameCompetition}
           </Badge>
         )}
@@ -187,8 +186,8 @@ export default async function PartidoDetailPage({
 
       {/* Designaciones (árbitros) — incluido en la captura para compartir */}
       {designations.length > 0 && (
-        <Card>
-          <CardHeader className="pb-2">
+        <Card className="gap-4">
+          <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
               <Users className="size-4" aria-hidden />
               Designaciones
@@ -216,9 +215,12 @@ export default async function PartidoDetailPage({
       </div>
 
       {/* Pabellón / dirección — no incluido en la captura */}
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-base">Pabellón y dirección</CardTitle>
+      <Card className="gap-4">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <MapPin className="size-4 text-muted-foreground" aria-hidden />
+            Dirección Polideportivo
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <VenueBlock m={match} />
@@ -227,24 +229,31 @@ export default async function PartidoDetailPage({
 
       {/* Clasificación del grupo — no incluida en la captura */}
       {standing.length > 0 && (
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base">Clasificación</CardTitle>
-            {group?.nameGroup && (
-              <p className="text-sm text-muted-foreground">{group.nameGroup}</p>
-            )}
+        <Card className="gap-4">
+          <CardHeader>
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <Medal className="size-4 text-muted-foreground" aria-hidden />
+                <CardTitle className="text-base">Clasificación</CardTitle>
+              </div>
+              {group?.nameGroup && (
+                <Badge variant="secondary" className="text-[10px] font-semibold">
+                  {group.nameGroup}
+                </Badge>
+              )}
+            </div>
           </CardHeader>
           <CardContent>
             <div className="overflow-x-auto">
               <table className="w-full min-w-[320px] text-sm">
                 <thead>
                   <tr className="border-b border-border text-left text-muted-foreground">
-                    <th className="pb-2 pr-2 font-medium">#</th>
+                    <th className="pb-2 pl-2 pr-2 font-medium">#</th>
                     <th className="pb-2 pr-2 font-medium">Equipo</th>
                     <th className="pb-2 pr-2 text-center font-medium">P.J.</th>
                     <th className="pb-2 pr-2 text-center font-medium">P.G.</th>
                     <th className="pb-2 pr-2 text-center font-medium">P.P.</th>
-                    <th className="pb-2 pl-2 text-right font-medium">Pts</th>
+                    <th className="pb-2 pl-2 pr-2 text-right font-medium">Pts</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -258,7 +267,7 @@ export default async function PartidoDetailPage({
                         : "border-b border-border/70 last:border-0";
                     return (
                       <tr key={row.idStanding ?? row.teamName ?? row.position} className={rowClass}>
-                        <td className="py-1.5 pr-2 tabular-nums">{row.position}</td>
+                        <td className="py-1.5 pl-2 pr-2 tabular-nums">{row.position}</td>
                         <td className="py-1.5 pr-2 font-medium">
                           {row.teamName}
                           {isLocal && (
@@ -273,7 +282,7 @@ export default async function PartidoDetailPage({
                         <td className="py-1.5 pr-2 text-center tabular-nums">{row.matchPlayed}</td>
                         <td className="py-1.5 pr-2 text-center tabular-nums">{row.matchWin}</td>
                         <td className="py-1.5 pr-2 text-center tabular-nums">{row.matchLost}</td>
-                        <td className="py-1.5 pl-2 text-right tabular-nums font-medium">
+                        <td className="py-1.5 pl-2 pr-2 text-right tabular-nums font-medium">
                           {row.standingScore}
                         </td>
                       </tr>
