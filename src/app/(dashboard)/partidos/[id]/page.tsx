@@ -199,9 +199,9 @@ export default async function PartidoDetailPage({
               {designations.map((d) => (
                 <li
                   key={d.designationId}
-                  className="flex flex-wrap items-baseline justify-between gap-2 border-b border-border pb-2 last:border-0 last:pb-0"
+                  className="flex items-baseline justify-between gap-2 border-b border-border pb-2 last:border-0 last:pb-0"
                 >
-                  <span className="text-sm font-medium text-foreground">
+                  <span className="min-w-0 flex-1 truncate whitespace-nowrap text-sm font-medium text-foreground" title={`${d.refereeName} ${d.refereeSurname}`}>
                     {d.refereeName} {d.refereeSurname}
                   </span>
                   <Badge variant="secondary" className="text-[10px] font-normal">

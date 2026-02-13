@@ -115,7 +115,7 @@ function WeeklySection({ items }: { items: PreliquidationWeeklyItem[] }) {
     <section className="space-y-4">
       <div className="flex h-8 items-center gap-2">
         <CalendarDays className="size-5 text-muted-foreground" aria-hidden />
-        <h2 className="text-lg font-semibold">Esta semana</h2>
+        <h2 className="text-lg font-semibold">Ingresos semana</h2>
         <Badge variant="outline" className="text-xs">
           {items.length} liquidacion{items.length !== 1 ? "es" : ""}
         </Badge>

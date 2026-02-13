@@ -155,7 +155,7 @@ function MyMatchesView({
   companionsByMatchId: Record<string, string>;
 }) {
   return (
-    <div className="space-y-4 pb-4">
+    <div className="space-y-4 pb-5">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <CalendarDays className="size-5 shrink-0 text-muted-foreground" aria-hidden />

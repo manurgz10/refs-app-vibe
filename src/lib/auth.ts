@@ -52,7 +52,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 },
               });
               if (personalRes.ok) {
-                const personal = (await personalRes.json()) as { id?: number; userId?: string; name?: string; lastName?: string; email?: string };
+                const personal = (await personalRes.json()) as {
+                  id?: number;
+                  userId?: string;
+                  name?: string;
+                  lastName?: string;
+                  email?: string;
+                  [key: string]: unknown;
+                };
                 const id = String(personal.id ?? personal.userId ?? "external");
                 const name = [personal.name, personal.lastName].filter(Boolean).join(" ") || personal.email || username;
                 const email = personal.email ?? username;
@@ -61,6 +68,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                   email,
                   name,
                   accessToken: bearerToken,
+                  profile: personal,
                 };
               }
             }
@@ -91,6 +99,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         if ("accessToken" in user && user.accessToken) {
           token.accessToken = user.accessToken as string;
         }
+        if ("profile" in user && user.profile) {
+          token.profile = user.profile as Record<string, unknown>;
+        }
       }
       return token;
     },
@@ -99,6 +110,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         session.user.id = token.id as string;
         if (token.accessToken) {
           (session as { accessToken?: string }).accessToken = token.accessToken as string;
+        }
+        if (token.profile) {
+          (session as { profile?: Record<string, unknown> }).profile = token.profile as Record<string, unknown>;
         }
       }
       return session;
